@@ -1,0 +1,54 @@
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - APP_KEY=base64:UYTsdnYh/UOh0j6Wz3nVqiGZKynXWJGMdyqUMIgKOjg=
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=app
+      - DB_USERNAME=app
+      - DB_PASSWORD=app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`localhost`)"
+      - "traefik.http.routers.app.entrypoints=web"
+      # - "traefik.http.routers.app.tls=true"
+      # - "traefik.http.routers.app.tls.certresolver=letsencrypt"
+      - "traefik.http.services.app_service.loadbalancer.server.port=9090"
+    depends_on:
+      - postgres
+    ports:
+    - 9090:9090
+
+  traefik:
+    image: traefik:v3.2.2
+    container_name: traefik
+    restart: always
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:38080"
+      - "--experimental.fastProxy"
+      - "--global.sendAnonymousUsage=false"
+    ports:
+      # - "443:443/udp"
+      # - "443:443/tcp"
+      - "38080:38080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    depends_on:
+      - app
+
+  postgres:
+    image: postgres:15.10-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      PGDATA: /var/lib/postgresql/data/pgdata
