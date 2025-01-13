@@ -16,8 +16,6 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`localhost`)"
       - "traefik.http.routers.app.entrypoints=web"
-      # - "traefik.http.routers.app.tls=true"
-      # - "traefik.http.routers.app.tls.certresolver=letsencrypt"
       - "traefik.http.services.app_service.loadbalancer.server.port=9090"
     depends_on:
       - postgres
@@ -36,8 +34,6 @@ services:
       - "--experimental.fastProxy"
       - "--global.sendAnonymousUsage=false"
     ports:
-      # - "443:443/udp"
-      # - "443:443/tcp"
       - "38080:38080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
